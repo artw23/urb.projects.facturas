@@ -10,7 +10,7 @@ public class InvoiceHttpDto {
     String clave_catastral;
     String contribucion;
     String fecha_pago;
-    String importe;
+    double importe;
     String no_liquidacion;
     String nombre_archivo;
     String periodo_final;
