@@ -10,7 +10,7 @@ import java.net.URL;
 @Service
 public class PdfFileDownloaderServiceImpl implements FileDownloaderService {
     @Override
-    public void downloadFile(String url, String path, String fileName) throws IOException {
+    public void downloadFile(String url, String path, String fileName) throws Exception {
 
         verifyDirectory(path);
 

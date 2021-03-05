@@ -5,6 +5,6 @@ import java.net.MalformedURLException;
 
 public interface FileDownloaderService {
 
-    void downloadFile(String url, String path, String fileName) throws IOException;
+    void downloadFile(String url, String path, String fileName) throws Exception;
     
 }

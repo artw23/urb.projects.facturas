@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static urb.projects.facturas.domain.InvoiceErrors.*;
 
@@ -43,16 +44,16 @@ public class UrbanaReportServiceImpl implements UrbanaReportService {
 
         List<InvoiceCsvDto> invoiceCsvDtos = retrieveInvoicesFromCsv(fileName);
 
-        for (InvoiceCsvDto invoiceCsvDto: invoiceCsvDtos) {
-            Invoice invoice = createInvoice(invoiceCsvDto);
-            result.add(invoice);
-        }
+        result = invoiceCsvDtos.parallelStream()
+                .map(inv -> createInvoice(inv))
+                .collect(Collectors.toList());
 
         writeResultsToCsv(result);
 
     }
 
     private void writeResultsToCsv(List<Invoice> result) {
+
         String out = "C:\\Users\\dapaj\\IdeaProjects\\facturacion\\src\\main\\resources\\out\\out.csv";
         try {
             csvParserService.writeCsv(result,out, Invoice.class);
@@ -77,7 +78,9 @@ public class UrbanaReportServiceImpl implements UrbanaReportService {
         Invoice invoice = Invoice.from(invoiceCsvDto);
 
         processInvoiceHttp(invoice);
+        if(invoice.getXmlUrl() == null) return invoice;
         processInvoiceXml(invoice);
+        if(invoice.getFactura() == null) return invoice;
         retrievePdfFile(invoice);
         retrieveXmlFile(invoice);
 
@@ -89,7 +92,7 @@ public class UrbanaReportServiceImpl implements UrbanaReportService {
 
         try {
             xmlFileDownloaderService.downloadFile(invoice.getXmlUrl(), baseUrl + invoice.getCondominio(), invoice.getFactura());
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             invoice.addError(ERROR_AL_DESCARGAR_XML);
         }
@@ -99,7 +102,7 @@ public class UrbanaReportServiceImpl implements UrbanaReportService {
         String baseUrl = "C:\\Users\\dapaj\\IdeaProjects\\facturacion\\src\\main\\resources\\out\\";
         try {
             pdfFileDownloaderService.downloadFile(invoice.getPdfUrl(), baseUrl + invoice.getCondominio(),  invoice.getFactura());
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             invoice.addError(ERROR_AL_DESCARGAR_PDF);
         }
@@ -127,12 +130,19 @@ public class UrbanaReportServiceImpl implements UrbanaReportService {
 
         InvoiceXmlDto invoiceXmlDto = null;
 
-        String xmlResult = xmlFileDownloaderService.downloadXmlString(invoice.getXmlUrl());
+        String xmlResult = null;
+        try {
+            xmlResult = xmlFileDownloaderService.downloadXmlString(invoice.getXmlUrl());
+        } catch (Exception e) {
+            e.printStackTrace();
+            invoice.addError(ERROR_AL_PROCESAR_XML);
+            return Optional.ofNullable(invoiceXmlDto);
+        }
 
         XmlMapper xmlMapper = new XmlMapper();
         try {
             invoiceXmlDto  = xmlMapper.readValue(xmlResult, InvoiceXmlDto.class);
-        } catch (JsonProcessingException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             invoice.addError(ERROR_AL_PROCESAR_XML);
         }
@@ -142,6 +152,11 @@ public class UrbanaReportServiceImpl implements UrbanaReportService {
 
     private void processInvoiceHttp(Invoice invoice){
         List<InvoiceHttpDto> invoiceHttpListDto = retrieveInvoicesDataFromHttp(invoice);
+
+        if(invoiceHttpListDto == null){
+            invoice.addError(SE_OBTUBOO_MAS_DE_UN_RESULTADO);
+            return;
+        }
 
         if(invoiceHttpListDto.size() != 1){
             invoice.addError(SE_OBTUBOO_MAS_DE_UN_RESULTADO);
@@ -165,7 +180,7 @@ public class UrbanaReportServiceImpl implements UrbanaReportService {
         List<InvoiceHttpDto> invoiceHttpListDto = new ArrayList<>();
         try {
             invoiceHttpListDto = invoiceHttpService.retrieveInvoice(invoice.getClaveCatastral(),2021,invoice.getCantidad());
-        } catch (JsonProcessingException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             invoice.addError(ERROR_AL_CONSULTAR_EN_SITIO_WEB);
         }

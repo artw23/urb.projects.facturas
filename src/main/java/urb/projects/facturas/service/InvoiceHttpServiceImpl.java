@@ -13,13 +13,13 @@ import java.util.List;
 public class InvoiceHttpServiceImpl implements InvoiceHttpService {
 
     @Override
-    public List<InvoiceHttpDto> retrieveInvoice(String claveCatastral, int year, int amount) throws JsonProcessingException {
+    public List<InvoiceHttpDto> retrieveInvoice(String claveCatastral, int year, int amount) throws Exception {
         return makeRequest(claveCatastral, year, amount);
 
     }
 
 
-    private List<InvoiceHttpDto> makeRequest(String claveCatastral, int year, int amount) throws JsonProcessingException {
+    private List<InvoiceHttpDto> makeRequest(String claveCatastral, int year, int amount) throws Exception {
         WebClient client = WebClient.builder()
                 .baseUrl("http://www.mqro.gob.mx/sello_digital/v2/functions.php")
                 .build();

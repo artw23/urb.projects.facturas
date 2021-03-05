@@ -12,8 +12,7 @@ import java.net.URL;
 public class XmlFileDownloaderServiceImpl implements FileDownloaderService {
 
     @Override
-    public void downloadFile(String url, String path, String fileName) throws IOException {
-
+    public void downloadFile(String url, String path, String fileName) throws Exception {
         verifyDirectory(path);
 
         String[] bits = url.split("/");
@@ -30,7 +29,7 @@ public class XmlFileDownloaderServiceImpl implements FileDownloaderService {
 
     }
 
-    public String downloadXmlString(String url){
+    public String downloadXmlString(String url) throws Exception{
 
         String[] bits = url.split("/");
         String lastOne = bits[bits.length-1];
@@ -47,6 +46,7 @@ public class XmlFileDownloaderServiceImpl implements FileDownloaderService {
                         .build())
                 .retrieve()
                 .bodyToMono(String.class)
+                .log()
                 .block();
         return result;
     }
