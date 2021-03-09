@@ -2,9 +2,15 @@ package urb.projects.facturas.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.Data;
 import urb.projects.facturas.dto.serializers.Numberdeserializer;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Data
@@ -18,8 +24,10 @@ public class InvoiceHttpDto {
 
     private String contribucion;
 
+    @JsonSerialize(using = LocalDateSerializer.class)
+    @JsonDeserialize(using = LocalDateDeserializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yy")
-    private Date fecha_pago;
+    private LocalDate fecha_pago;
 
     @JsonDeserialize(using = Numberdeserializer.class)
     private double importe;

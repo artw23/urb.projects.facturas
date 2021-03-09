@@ -18,6 +18,29 @@ public class InvoiceHttpServiceImpl implements InvoiceHttpService {
 
     }
 
+    @Override
+    public List<InvoiceHttpDto> retrieveInvoice(String claveCatastral, int year) throws Exception {
+        WebClient client = WebClient.builder()
+                .baseUrl("http://www.mqro.gob.mx/sello_digital/v2/functions.php")
+                .build();
+
+        String result = client.get()
+                .uri(uriBuilder -> uriBuilder
+                        .queryParam("tipoBusqueda", "P")
+                        .queryParam("anio", year)
+                        .queryParam("operacion", claveCatastral)
+                        .queryParam("importe", "1 OR 1=1")
+                        .build())
+                .retrieve()
+                .bodyToMono(String.class)
+                .log()
+                .block();
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        InvoiceHttpListDto invoiceHttpListDto =  objectMapper.readValue(result, InvoiceHttpListDto.class);
+        return invoiceHttpListDto.getRecibos();
+    }
+
 
     private List<InvoiceHttpDto> makeRequest(String claveCatastral, int year, int amount) throws Exception {
         WebClient client = WebClient.builder()

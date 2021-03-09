@@ -1,23 +1,20 @@
 package urb.projects.facturas.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import urb.projects.facturas.domain.Invoice;
-import urb.projects.facturas.domain.InvoiceErrors;
 import urb.projects.facturas.dto.InvoiceCsvDto;
 import urb.projects.facturas.dto.InvoiceHttpDto;
-import urb.projects.facturas.dto.InvoiceHttpListDto;
 import urb.projects.facturas.dto.InvoiceXmlDto;
 import urb.projects.facturas.service.filedownloader.PdfFileDownloaderServiceImpl;
 import urb.projects.facturas.service.filedownloader.XmlFileDownloaderServiceImpl;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -84,6 +81,7 @@ public class UrbanaReportServiceImpl implements UrbanaReportService {
         Invoice invoice = Invoice.from(invoiceCsvDto);
 
         processInvoiceHttp(invoice);
+
         if(invoice.getXmlUrl() == null) return invoice;
         processInvoiceXml(invoice);
         if(invoice.getFactura() == null) return invoice;
@@ -124,7 +122,7 @@ public class UrbanaReportServiceImpl implements UrbanaReportService {
 
         InvoiceXmlDto invoiceXmlDto = invoiceXmlDtoOptional.get();
 
-        if(invoice.getCantidad() != invoiceXmlDto.getTotal()){
+        if(invoice.getCantidadInicial() != invoiceXmlDto.getTotal()){
             invoice.addError(NO_COINCIDE_CANTIDAD_CON_XML);
         }
 
@@ -160,33 +158,58 @@ public class UrbanaReportServiceImpl implements UrbanaReportService {
         List<InvoiceHttpDto> invoiceHttpListDto = retrieveInvoicesDataFromHttp(invoice);
 
         if(invoiceHttpListDto == null){
-            invoice.addError(NO_SE_ENCONTRO_RESULTADO);
-            return;
+            invoiceHttpListDto = retrieveAllInvoicesDataFromHttp(invoice);
+            if(invoiceHttpListDto == null){
+                invoice.addError(NO_SE_ENCONTRO_RESULTADO);
+                return;
+            }
         }
 
         if(invoiceHttpListDto.size() != 1){
             invoice.addError(SE_OBTUBOO_MAS_DE_UN_RESULTADO);
         }
 
+        String rawDate =  env.getProperty("fecha.de.pago");
+        LocalDate formattedDate = LocalDate.parse(String.format(rawDate, DateTimeFormatter.ISO_LOCAL_DATE));
+
         Optional<InvoiceHttpDto> optionalInvoiceHttpDto = invoiceHttpListDto.stream()
-                .filter(inv -> inv.getImporte() == invoice.getCantidad())
+                .filter(inv -> inv.getFecha_pago().compareTo(formattedDate) == 0)
                 .max(Comparator.comparing(InvoiceHttpDto::getFecha_pago));
 
         if(optionalInvoiceHttpDto.isEmpty()){
-            invoice.addError(NO_COINCIDE_CANTIDAD_CON_PAGINA_WEB);
+            invoice.addError(NO_SE_ENCONTRO_RESULTADO_COM_FECHA);
             return;
         }
 
+
+
         InvoiceHttpDto invoiceHttpDto = optionalInvoiceHttpDto.get();
+        if(invoiceHttpDto.getImporte() != invoice.getCantidadInicial()){
+            invoice.addError(CANTIDADES_NO_COINCIDEN);
+        }
+
+        invoice.setCantidadFinal(invoiceHttpDto.getImporte());
+        invoice.setPeriodo(invoiceHttpDto.getPeriodo_inicial());
         invoice.setFecha(invoiceHttpDto.getFecha_pago());
         invoice.setPdfUrl(invoiceHttpDto.getArchivo_pdf());
         invoice.setXmlUrl(invoiceHttpDto.getArchivo_xml());
     }
 
+    private List<InvoiceHttpDto> retrieveAllInvoicesDataFromHttp(Invoice invoice) {
+        List<InvoiceHttpDto> invoiceHttpListDto = new ArrayList<>();
+        try {
+            invoiceHttpListDto = invoiceHttpService.retrieveInvoice(invoice.getClaveCatastral(),2021);
+        } catch (Exception e) {
+            e.printStackTrace();
+            invoice.addError(ERROR_AL_CONSULTAR_EN_SITIO_WEB);
+        }
+        return invoiceHttpListDto;
+    }
+
     private List<InvoiceHttpDto> retrieveInvoicesDataFromHttp(Invoice invoice){
         List<InvoiceHttpDto> invoiceHttpListDto = new ArrayList<>();
         try {
-            invoiceHttpListDto = invoiceHttpService.retrieveInvoice(invoice.getClaveCatastral(),2021,invoice.getCantidad());
+            invoiceHttpListDto = invoiceHttpService.retrieveInvoice(invoice.getClaveCatastral(),2021,invoice.getCantidadInicial());
         } catch (Exception e) {
             e.printStackTrace();
             invoice.addError(ERROR_AL_CONSULTAR_EN_SITIO_WEB);
