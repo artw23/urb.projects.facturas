@@ -6,6 +6,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import urb.projects.facturas.domain.Invoice;
 import urb.projects.facturas.domain.InvoiceErrors;
@@ -18,6 +19,7 @@ import urb.projects.facturas.service.filedownloader.XmlFileDownloaderServiceImpl
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -37,14 +39,18 @@ public class UrbanaReportServiceImpl implements UrbanaReportService {
 
     private CsvParserServiceImpl csvParserService;
 
+    private Environment env;
+
     @Override
-    public void processInvoiceReport(String fileName) {
+    public void processInvoiceReport() {
 
         List<Invoice> result = new ArrayList<>();
 
+        String fileName = env.getProperty("input.file");
+
         List<InvoiceCsvDto> invoiceCsvDtos = retrieveInvoicesFromCsv(fileName);
 
-        result = invoiceCsvDtos.parallelStream()
+        result = invoiceCsvDtos.stream()
                 .map(inv -> createInvoice(inv))
                 .collect(Collectors.toList());
 
@@ -54,7 +60,7 @@ public class UrbanaReportServiceImpl implements UrbanaReportService {
 
     private void writeResultsToCsv(List<Invoice> result) {
 
-        String out = "C:\\Users\\dapaj\\IdeaProjects\\facturacion\\src\\main\\resources\\out\\out.csv";
+        String out =  env.getProperty("output.dir") + "out.csv";
         try {
             csvParserService.writeCsv(result,out, Invoice.class);
         } catch (IOException e) {
@@ -88,7 +94,7 @@ public class UrbanaReportServiceImpl implements UrbanaReportService {
     }
 
     private void retrieveXmlFile(Invoice invoice) {
-        String baseUrl = "C:\\Users\\dapaj\\IdeaProjects\\facturacion\\src\\main\\resources\\out\\";
+        String baseUrl = env.getProperty("output.dir");
 
         try {
             xmlFileDownloaderService.downloadFile(invoice.getXmlUrl(), baseUrl + invoice.getCondominio(), invoice.getFactura());
@@ -99,7 +105,7 @@ public class UrbanaReportServiceImpl implements UrbanaReportService {
     }
 
     private void retrievePdfFile(Invoice invoice) {
-        String baseUrl = "C:\\Users\\dapaj\\IdeaProjects\\facturacion\\src\\main\\resources\\out\\";
+        String baseUrl = env.getProperty("output.dir");
         try {
             pdfFileDownloaderService.downloadFile(invoice.getPdfUrl(), baseUrl + invoice.getCondominio(),  invoice.getFactura());
         } catch (Exception e) {
@@ -154,7 +160,7 @@ public class UrbanaReportServiceImpl implements UrbanaReportService {
         List<InvoiceHttpDto> invoiceHttpListDto = retrieveInvoicesDataFromHttp(invoice);
 
         if(invoiceHttpListDto == null){
-            invoice.addError(SE_OBTUBOO_MAS_DE_UN_RESULTADO);
+            invoice.addError(NO_SE_ENCONTRO_RESULTADO);
             return;
         }
 
@@ -164,7 +170,7 @@ public class UrbanaReportServiceImpl implements UrbanaReportService {
 
         Optional<InvoiceHttpDto> optionalInvoiceHttpDto = invoiceHttpListDto.stream()
                 .filter(inv -> inv.getImporte() == invoice.getCantidad())
-                .findFirst();
+                .max(Comparator.comparing(InvoiceHttpDto::getFecha_pago));
 
         if(optionalInvoiceHttpDto.isEmpty()){
             invoice.addError(NO_COINCIDE_CANTIDAD_CON_PAGINA_WEB);
@@ -172,6 +178,7 @@ public class UrbanaReportServiceImpl implements UrbanaReportService {
         }
 
         InvoiceHttpDto invoiceHttpDto = optionalInvoiceHttpDto.get();
+        invoice.setFecha(invoiceHttpDto.getFecha_pago());
         invoice.setPdfUrl(invoiceHttpDto.getArchivo_pdf());
         invoice.setXmlUrl(invoiceHttpDto.getArchivo_xml());
     }

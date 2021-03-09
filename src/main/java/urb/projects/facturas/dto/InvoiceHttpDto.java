@@ -1,19 +1,35 @@
 package urb.projects.facturas.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Data;
+import urb.projects.facturas.dto.serializers.Numberdeserializer;
+
+import java.util.Date;
 
 @Data
 public class InvoiceHttpDto {
 
-    String archivo_pdf;
-    String archivo_xml;
-    String clave_catastral;
-    String contribucion;
-    String fecha_pago;
-    double importe;
-    String no_liquidacion;
-    String nombre_archivo;
-    String periodo_final;
-    String periodo_inicial;
+    private String archivo_pdf;
+
+    private String archivo_xml;
+
+    private String clave_catastral;
+
+    private String contribucion;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yy")
+    private Date fecha_pago;
+
+    @JsonDeserialize(using = Numberdeserializer.class)
+    private double importe;
+
+    private String no_liquidacion;
+
+    private String nombre_archivo;
+
+    private String periodo_final;
+
+    private String periodo_inicial;
   
 }

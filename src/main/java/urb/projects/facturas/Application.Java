@@ -24,7 +24,7 @@ public class Application implements CommandLineRunner {
     @Override
     public void run(String... args) {
 
-        urbanaReportService.processInvoiceReport("C:\\Users\\dapaj\\IdeaProjects\\facturacion\\src\\main\\resources\\out\\example.csv");
+        urbanaReportService.processInvoiceReport();
     }
 
 }

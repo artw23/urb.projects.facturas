@@ -8,10 +8,11 @@ import urb.projects.facturas.dto.InvoiceHttpDto;
 import urb.projects.facturas.dto.InvoiceXmlDto;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Data
-@JsonPropertyOrder({"condominio", "numero", "claveCatastral", "cantidad", "factura", "errores"})
+@JsonPropertyOrder({"condominio", "numero", "claveCatastral", "cantidad", "factura", "fecha", "errores"})
 public class Invoice {
 
     String condominio;
@@ -23,6 +24,8 @@ public class Invoice {
     String claveCatastral;
 
     String factura;
+
+    Date fecha;
 
     @JsonIgnore
     String pdfUrl;
