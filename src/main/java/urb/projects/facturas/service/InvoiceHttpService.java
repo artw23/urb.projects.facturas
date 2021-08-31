@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface InvoiceHttpService {
 
-    List<InvoiceHttpDto> retrieveInvoice(String claveCatastral, int year, int amount) throws Exception;
+    List<InvoiceHttpDto> retrieveInvoice(String claveCatastral, int year, double amount) throws Exception;
 
     List<InvoiceHttpDto> retrieveInvoice(String claveCatastral, int year) throws Exception;
 

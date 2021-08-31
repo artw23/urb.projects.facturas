@@ -1,6 +1,6 @@
 package urb.projects.facturas.domain;
 
-public enum InvoiceErrors {
+public enum FacturaErrors {
     ERROR_AL_CONSULTAR_EN_SITIO_WEB,
     SE_OBTUBOO_MAS_DE_UN_RESULTADO,
     NO_COINCIDE_CANTIDAD_CON_PAGINA_WEB,

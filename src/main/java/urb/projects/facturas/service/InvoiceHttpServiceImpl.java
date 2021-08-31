@@ -13,7 +13,7 @@ import java.util.List;
 public class InvoiceHttpServiceImpl implements InvoiceHttpService {
 
     @Override
-    public List<InvoiceHttpDto> retrieveInvoice(String claveCatastral, int year, int amount) throws Exception {
+    public List<InvoiceHttpDto> retrieveInvoice(String claveCatastral, int year, double amount) throws Exception {
         return makeRequest(claveCatastral, year, amount);
 
     }
@@ -42,7 +42,7 @@ public class InvoiceHttpServiceImpl implements InvoiceHttpService {
     }
 
 
-    private List<InvoiceHttpDto> makeRequest(String claveCatastral, int year, int amount) throws Exception {
+    private List<InvoiceHttpDto> makeRequest(String claveCatastral, int year, double amount) throws Exception {
         WebClient client = WebClient.builder()
                 .baseUrl("http://www.mqro.gob.mx/sello_digital/v2/functions.php")
                 .build();
@@ -52,7 +52,7 @@ public class InvoiceHttpServiceImpl implements InvoiceHttpService {
                         .queryParam("tipoBusqueda", "P")
                         .queryParam("anio", year)
                         .queryParam("operacion", claveCatastral)
-                        .queryParam("importe", amount)
+                        .queryParam("importe", (int)amount)
                         .build())
                 .retrieve()
                 .bodyToMono(String.class)

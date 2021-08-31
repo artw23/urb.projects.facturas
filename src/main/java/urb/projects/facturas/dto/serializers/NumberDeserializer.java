@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 
 import java.io.IOException;
 
-public class Numberdeserializer extends JsonDeserializer<Double> {
+public class NumberDeserializer extends JsonDeserializer<Double> {
 
 
     @Override

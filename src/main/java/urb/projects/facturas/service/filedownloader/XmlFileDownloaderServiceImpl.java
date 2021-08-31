@@ -1,6 +1,8 @@
 package urb.projects.facturas.service.filedownloader;
 
+import java.io.InputStream;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -12,9 +14,7 @@ import java.net.URL;
 public class XmlFileDownloaderServiceImpl implements FileDownloaderService {
 
     @Override
-    public void downloadFile(String url, String path, String fileName) throws Exception {
-        verifyDirectory(path);
-
+    public byte[] downloadFile(String url) throws Exception {
         String[] bits = url.split("/");
         String lastOne = bits[bits.length-1];
         lastOne = lastOne.replace(".xml","");
@@ -22,11 +22,25 @@ public class XmlFileDownloaderServiceImpl implements FileDownloaderService {
         String baseUrl = "http://200.79.74.185/cpd_predial/descarga_xml_cfdi.php?";
         baseUrl = baseUrl + "urlxml=" + url;
         baseUrl = baseUrl + "&namexml=" + lastOne;
-        FileUtils.copyURLToFile(
-                new URL(baseUrl),
-                new File(path+"/"+fileName+".xml"),
-                10000, 10000);
 
+        return fetchRemoteFile(baseUrl);
+
+    }
+
+    private byte[] fetchRemoteFile(String location) throws Exception {
+        URL url = new URL(location);
+        InputStream is = null;
+        byte[] bytes = null;
+        try {
+            is = url.openStream ();
+            bytes = IOUtils.toByteArray(is);
+        } catch (IOException e) {
+            //handle errors
+        }
+        finally {
+            if (is != null) is.close();
+        }
+        return bytes;
     }
 
     public String downloadXmlString(String url) throws Exception{
@@ -51,10 +65,4 @@ public class XmlFileDownloaderServiceImpl implements FileDownloaderService {
         return result;
     }
 
-    private void verifyDirectory(String path){
-        File directory = new File(path);
-        if (! directory.exists()){
-            directory.mkdirs();
-        }
-    }
 }

@@ -4,27 +4,19 @@ import lombok.AllArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import urb.projects.facturas.dto.InvoiceCsvDto;
-import urb.projects.facturas.service.CsvParserService;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import urb.projects.facturas.service.UrbanaReportService;
-
-import java.util.List;
 
 
 @SpringBootApplication
 @AllArgsConstructor
-public class Application implements CommandLineRunner {
+@EnableJpaAuditing
+public class Application{
 
     private UrbanaReportService urbanaReportService;
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);
-    }
-
-    @Override
-    public void run(String... args) {
-
-        urbanaReportService.processInvoiceReport();
     }
 
 }

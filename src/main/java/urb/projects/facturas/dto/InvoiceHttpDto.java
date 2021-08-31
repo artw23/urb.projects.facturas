@@ -4,14 +4,11 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
-import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 import lombok.Data;
-import urb.projects.facturas.dto.serializers.Numberdeserializer;
+import urb.projects.facturas.dto.serializers.NumberDeserializer;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 @Data
 public class InvoiceHttpDto {
@@ -29,7 +26,7 @@ public class InvoiceHttpDto {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yy")
     private LocalDate fecha_pago;
 
-    @JsonDeserialize(using = Numberdeserializer.class)
+    @JsonDeserialize(using = NumberDeserializer.class)
     private double importe;
 
     private String no_liquidacion;
