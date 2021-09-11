@@ -7,7 +7,9 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import urb.projects.facturas.domain.Factura;
 import urb.projects.facturas.domain.File;
@@ -47,6 +49,7 @@ public class ReporteService {
 
   }
 
+  @Async
   public void run(UUID id) {
     updateStatus(id, ReportStatus.RUNNING);
     facturaService.processAll(id);

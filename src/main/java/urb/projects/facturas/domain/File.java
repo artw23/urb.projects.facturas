@@ -12,6 +12,9 @@ public class File extends BaseEntity {
   @Column
   private String nombre;
 
+  @Column
+  private String extension;
+
   @Lob
   private byte[] content;
 

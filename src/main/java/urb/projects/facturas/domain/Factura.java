@@ -3,7 +3,9 @@ package urb.projects.facturas.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.UUID;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.Enumerated;
 import lombok.Data;
 import urb.projects.facturas.dto.InvoiceCsvDto;
 
@@ -53,5 +55,17 @@ public class Factura extends BaseEntity{
 
     @Column(name = "xml_file_id")
     private UUID xmlfileId;
+
+    @Column(name = "errores")
+    @Enumerated
+    @ElementCollection(targetClass = FacturaErrors.class)
+    private List<FacturaErrors> errores;
+
+    public void addError(FacturaErrors error) {
+        if(errores == null){
+            errores = new ArrayList<>();
+        }
+        errores.add(error);
+    }
 
 }

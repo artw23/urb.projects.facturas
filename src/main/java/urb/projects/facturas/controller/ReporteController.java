@@ -8,6 +8,8 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +36,8 @@ public class ReporteController {
   }
 
   @GetMapping
-  public Page<Reporte> getAll(Pageable pageable) {
+  public Page<Reporte> getAll(
+      @PageableDefault(size = 20, sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
     return reporteService.getAll(pageable);
   }
 
@@ -48,14 +51,14 @@ public class ReporteController {
   }
 
   @PostMapping(value = "/{id}/run")
-  public ResponseEntity run(@PathVariable UUID id) throws IOException {
-     reporteService.run(id);
-     return new ResponseEntity(HttpStatus.ACCEPTED);
-
+  public ResponseEntity run(@PathVariable UUID id) throws IOException, InterruptedException {
+    reporteService.run(id);
+    Thread.sleep(2000);
+    return new ResponseEntity(HttpStatus.ACCEPTED);
   }
 
 
-  @RequestMapping(value="/{id}/download", produces="application/zip")
+  @RequestMapping(value = "/{id}/download", produces = "application/zip")
   public ResponseEntity<StreamingResponseBody> zipFiles(@PathVariable UUID id) {
     return ResponseEntity
         .ok()
@@ -64,7 +67,7 @@ public class ReporteController {
           List<File> filesToDownload = reporteService.download(id);
           ZipOutputStream zipOutputStream = new ZipOutputStream(out);
 
-          for (File fileToDownload: filesToDownload) {
+          for (File fileToDownload : filesToDownload) {
             ZipEntry entry = new ZipEntry(fileToDownload.getNombre());
             entry.setSize(fileToDownload.getContent().length);
             zipOutputStream.putNextEntry(entry);
