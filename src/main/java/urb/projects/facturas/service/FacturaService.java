@@ -213,7 +213,7 @@ public class FacturaService {
   private List<InvoiceHttpDto> retrieveAllInvoicesDataFromHttp(Factura invoice) {
     List<InvoiceHttpDto> invoiceHttpListDto = new ArrayList<>();
     try {
-      invoiceHttpListDto = invoiceHttpService.retrieveInvoice(invoice.getClaveCatastral(), 2021);
+      invoiceHttpListDto = invoiceHttpService.retrieveInvoice(invoice.getClaveCatastral(), invoice.getFecha().getYear());
     } catch (Exception e) {
       e.printStackTrace();
       invoice.addError(ERROR_AL_CONSULTAR_EN_SITIO_WEB);
@@ -225,7 +225,7 @@ public class FacturaService {
     List<InvoiceHttpDto> invoiceHttpListDto = new ArrayList<>();
     try {
       invoiceHttpListDto = invoiceHttpService
-          .retrieveInvoice(invoice.getClaveCatastral(), 2021, invoice.getCantidadInicial());
+          .retrieveInvoice(invoice.getClaveCatastral(), invoice.getFecha().getYear(), invoice.getCantidadInicial());
     } catch (Exception e) {
       e.printStackTrace();
       invoice.addError(ERROR_AL_CONSULTAR_EN_SITIO_WEB);
