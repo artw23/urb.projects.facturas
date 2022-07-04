@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<cfdi:Comprobante xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Moneda="MXN" TipoCambio="1" Total="181"
+                  xsi:schemaLocation="http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd"
+                  Exportacion="01" MetodoPago="PUE" TipoDeComprobante="I" SubTotal="181"
+                  Sello="SAMZSSTKtuBIKCwxDWCufMe6waiWCFNGKD2N3ANMOttRWp46Q/+GgMSeSmTRKGQj5gKzODkjc9VXYuYrJJAXA1Q9H9mochM/M5hnJrMs3+44cwR3nOpHxplsBNyOcG2P3BpD1EJNhmo4bG3Kwr9d6O8acQEFZWwJo880nGW7OYYO4ZFSyvXQipFjl4p3DKVlrE3VmRzL6xUTuyfr6gRdhoMeHla0bnnJOGcUvPwb8PShIKaxHEaLkcdH7dwcBDhMVVDj2bjm+0RDh9Foq70yUKjE3xz5b1RYhUicpBY6uahVQRMgnjfLkfDM6e/5xQy1dlPzl59no723rh6CpqtyJw=="
+                  Certificado="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"
+                  NoCertificado="00001000000413375896" FormaPago="04" LugarExpedicion="76090"
+                  Fecha="2022-07-01T11:34:44" Folio="5198788" Serie="ING" Version="4.0"
+                  xmlns:cfdi="http://www.sat.gob.mx/cfd/4">
+    <cfdi:CfdiRelacionados TipoRelacion="04">
+        <cfdi:CfdiRelacionado UUID="b19993f2-89fd-45a6-a87e-11e87042093f"/>
+    </cfdi:CfdiRelacionados>
+    <cfdi:Emisor Rfc="MQU220926DZA" Nombre="MUNICIPIO DE QUERETARO" RegimenFiscal="603"/>
+    <cfdi:Receptor Rfc="DIC070623TY3" Nombre="DESARROLLOS INMOBILIARIOS CODEINMEX" DomicilioFiscalReceptor="76269"
+                   RegimenFiscalReceptor="601" UsoCFDI="G01"/>
+    <cfdi:Conceptos>
+        <cfdi:Concepto ClaveProdServ="93161700" NoIdentificacion="Z-4112981" Cantidad="1" ClaveUnidad="E48"
+                       Unidad="SERVICIO"
+                       Descripcion="4432603 ALINEAMIENTO NOMENCLATURA Y NUMERO OFICIAL. null Queretaro null NOF202212212 140211801094420 null undefined. PAGO REALIZADO EN FECHA 24/06/2022"
+                       ValorUnitario="181" Importe="181" ObjetoImp="01"/>
+    </cfdi:Conceptos>
+    <cfdi:Complemento>
+        <tfd:TimbreFiscalDigital
+                xsi:schemaLocation="http://www.sat.gob.mx/TimbreFiscalDigital http://www.sat.gob.mx/sitio_internet/cfd/TimbreFiscalDigital/TimbreFiscalDigitalv11.xsd"
+                FechaTimbrado="2022-07-01T11:35:40" NoCertificadoSAT="00001000000509846663" RfcProvCertif="LSO1306189R5"
+                SelloCFD="SAMZSSTKtuBIKCwxDWCufMe6waiWCFNGKD2N3ANMOttRWp46Q/+GgMSeSmTRKGQj5gKzODkjc9VXYuYrJJAXA1Q9H9mochM/M5hnJrMs3+44cwR3nOpHxplsBNyOcG2P3BpD1EJNhmo4bG3Kwr9d6O8acQEFZWwJo880nGW7OYYO4ZFSyvXQipFjl4p3DKVlrE3VmRzL6xUTuyfr6gRdhoMeHla0bnnJOGcUvPwb8PShIKaxHEaLkcdH7dwcBDhMVVDj2bjm+0RDh9Foq70yUKjE3xz5b1RYhUicpBY6uahVQRMgnjfLkfDM6e/5xQy1dlPzl59no723rh6CpqtyJw=="
+                SelloSAT="DpMUrWgOJGJuyCbG8ON5vIqepprv8N5oghET6OB94q0sTne7fpHrAm9Z7IN6vtzPrErO8AjVHxywCEKAwMbl7fT/GRyfX6X4eIoL2/OsCvAMRHuvhY3kFiWdzvq5wjbke9rnoYyAp+25e0PfiUACyiLp07TTcH+YTTiZrNmnGjEV5RDC5+EbpWPCI6++/uz3yFBYkym0wnVzFDeV2jm1hK75HhLCbOLgHeBZE/zHK5dW8atHb43YLMTNN6m9lszGOmkZa+GJie57bSyBk9EUK3tjN9eGNQnHG4tvvLo7jopvsd+3WbRc1bevLi0beMrJYldVfmip1boSCWxZQ2Vd1g=="
+                UUID="bc6bd00f-aed1-4165-a53e-de84e704fe5f" Version="1.1"
+                xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital"/>
+    </cfdi:Complemento>
+</cfdi:Comprobante>

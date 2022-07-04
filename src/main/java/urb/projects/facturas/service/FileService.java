@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import urb.projects.facturas.domain.File;
 import urb.projects.facturas.domain.FileRepository;
-
 @Service
 public class FileService {
 
@@ -26,7 +25,7 @@ public class FileService {
     return fileRepository.findAllById(uuids);
   }
 
-  public File saveFile(String nombre, byte[] bytes) throws IOException {
+  public File saveFile(String nombre, byte[] bytes){
     File file = new File();
     file.setNombre(nombre);
     file.setContent(bytes);
@@ -35,7 +34,7 @@ public class FileService {
 
 
 
-  public File getFile(UUID id) throws IOException {
+  public File getFile(UUID id) {
     return fileRepository.getOne(id);
   }
 

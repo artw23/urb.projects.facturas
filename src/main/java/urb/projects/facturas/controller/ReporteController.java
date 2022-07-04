@@ -21,45 +21,57 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
+import urb.projects.facturas.domain.Factura;
 import urb.projects.facturas.domain.File;
-import urb.projects.facturas.domain.Reporte;
-import urb.projects.facturas.service.ReporteService;
+import urb.projects.facturas.domain.InvoiceType;
+import urb.projects.facturas.domain.Report;
+import urb.projects.facturas.service.report.InvoiceService;
+import urb.projects.facturas.service.report.ReportService;
 
 @RestController
-@RequestMapping("/reporte")
+@RequestMapping("/reports")
 public class ReporteController {
 
-  private ReporteService reporteService;
+  private ReportService reporteService;
 
-  public ReporteController(ReporteService reporteService) {
+  private InvoiceService facturaService;
+
+  public ReporteController(ReportService reporteService, InvoiceService facturaService) {
     this.reporteService = reporteService;
+    this.facturaService = facturaService;
   }
 
   @GetMapping
-  public Page<Reporte> getAll(
+  public Page<Report> getAllReports(
       @PageableDefault(size = 20, sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
     return reporteService.getAll(pageable);
   }
 
   @PostMapping
-  public Reporte create(@RequestParam("fecha_de_pago")
-  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaDePago,
-      @RequestParam("file") MultipartFile file) throws IOException {
-
-    return reporteService.create(fechaDePago, file);
+  public Report createReport(@RequestParam("payment_date")
+  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate paymentDate,
+                             @RequestParam("invoice_type") InvoiceType invoiceType,
+                             @RequestParam("file") MultipartFile file) throws IOException {
+    return reporteService.createReport(paymentDate, invoiceType, file);
 
   }
 
-  @PostMapping(value = "/{id}/run")
-  public ResponseEntity run(@PathVariable UUID id) throws IOException, InterruptedException {
-    reporteService.run(id);
+  @GetMapping(value = "/{id}/invoices")
+  public Page<Factura> getReportInvoices(@PathVariable UUID id,
+                                         @PageableDefault(size = 20, sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
+    return facturaService.getFacturasByReporeId(id, pageable);
+  }
+
+  @PostMapping(value = "/{id}/process")
+  public ResponseEntity processReport(@PathVariable UUID id) throws Exception {
+    reporteService.processReport(id);
     Thread.sleep(2000);
     return new ResponseEntity(HttpStatus.ACCEPTED);
   }
 
 
   @RequestMapping(value = "/{id}/download", produces = "application/zip")
-  public ResponseEntity<StreamingResponseBody> zipFiles(@PathVariable UUID id) {
+  public ResponseEntity<StreamingResponseBody> downloadReport(@PathVariable UUID id) {
     return ResponseEntity
         .ok()
         .header("Content-Disposition", "attachment; filename=\"test.zip\"")

@@ -29,6 +29,9 @@ public class Factura extends BaseEntity{
     @Column(name = "clave_catastral")
     private String claveCatastral;
 
+    @Column(name = "operacion")
+    private String operacion;
+
     @Column(name = "cantidad_inicial")
     private double cantidadInicial;
 
@@ -56,16 +59,22 @@ public class Factura extends BaseEntity{
     @Column(name = "xml_file_id")
     private UUID xmlfileId;
 
+    @ElementCollection
     @Column(name = "errores")
-    @Enumerated
-    @ElementCollection(targetClass = FacturaErrors.class)
-    private List<FacturaErrors> errores;
+    private List<String> errores;
 
     public void addError(FacturaErrors error) {
         if(errores == null){
             errores = new ArrayList<>();
         }
-        errores.add(error);
+        errores.add(error.getMessage());
+    }
+
+    public void addError(FacturaErrors error, Exception e) {
+        if(errores == null){
+            errores = new ArrayList<>();
+        }
+        errores.add(error.getMessage() + "\n" + e.getMessage());
     }
 
 }

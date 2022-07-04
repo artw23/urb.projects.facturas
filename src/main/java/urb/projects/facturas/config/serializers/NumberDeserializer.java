@@ -1,4 +1,4 @@
-package urb.projects.facturas.dto.serializers;
+package urb.projects.facturas.config.serializers;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
