@@ -1,23 +1,18 @@
 package urb.projects.facturas.domain;
 
 public enum FacturaErrors {
-    ERROR_AL_CONSULTAR_EN_SITIO_WEB(""),
-    SE_OBTUBOO_MAS_DE_UN_RESULTADO(""),
-    NO_COINCIDE_CANTIDAD_CON_PAGINA_WEB(""),
-    ERROR_AL_PROCESAR_XML(""),
-    NO_COINCIDE_CANTIDAD_CON_XML(""),
-    ERROR_AL_DESCARGAR_PDF(""),
-    ERROR_AL_DESCARGAR_XML(""),
-    NO_SE_ENCONTRO_RESULTADO(""),
-    CANTIDADES_NO_COINCIDEN(""),
-    NO_INVOICE_FOUND("No se encontro factura en sitio web"),
+    NO_INVOICE_FOUND("No se encontro factura en sitio web\n"),
     NO_SE_ENCONTRO_RESULTADO_COM_FECHA(""),
-    ERROR_DOWNLOADING_XML("Error al descargar XML"),
-    ERROR_DOWNLOADING_PDF("Error al descargar PDF"),
-    ERROR_PARSING_INVOICE_RESPONSE("Error al leer respuesta de busqueda"),
-    ERROR_PARSING_XML("Error al leer XML"),
-    WRONG_INVOICE_RETRIEVE("No coinciden datos con factura obtenida"),
-    UNKNOW_ERROR("ERROR DESCONOCIDO");
+    ERROR_DOWNLOADING_XML("Error al descargar XML\n"),
+    ERROR_DOWNLOADING_PDF("Error al descargar PDF\n"),
+    ERROR_PARSING_INVOICE_RESPONSE("Error al leer respuesta de busqueda\n"),
+    ERROR_PARSING_XML("Error al leer XML\n"),
+    WRONG_INVOICE_RETRIEVE("No coinciden datos con factura obtenida\n"),
+    UNKNOW_ERROR("ERROR DESCONOCIDO\n"),
+    NO_G01_INVOICE("No se encontro factura G01\n"),
+    AMOUNT_DONT_MATCH("Las cantidades no coinciden\n"),
+    INVOICE_WITH_MATCH_PRICE_AND_DATE("Se encontro recibo con misma cantidad y fecha\n"),
+    AMOUNT_MATCHED_BUT_NOT_DATE("Se encontro recibo misma cantidad pero diferente fecha\n");
 
 
     private String message;

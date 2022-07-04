@@ -59,6 +59,8 @@ public class Factura extends BaseEntity{
     @Column(name = "xml_file_id")
     private UUID xmlfileId;
 
+    @Column(name = "receipt_file_id")
+    private UUID recepitFileId;
     @ElementCollection
     @Column(name = "errores")
     private List<String> errores;

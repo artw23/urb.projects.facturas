@@ -1,17 +1,13 @@
 package urb.projects.facturas.service.report;
 
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import urb.projects.facturas.dto.InvoiceXmlDto;
-import urb.projects.facturas.dto.ReceptorXml;
 import urb.projects.facturas.service.filedownloader.FileDownloaderService;
 
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -40,7 +36,7 @@ class InvoiceHttpServiceTest {
 
         byte [] output = Files.readAllBytes( Paths.get(path,fileName));
 
-        when(fileDownloaderService.downloadFile(any())).thenReturn(output);
+        when(fileDownloaderService.getDownloadFile(any())).thenReturn(output);
 
         InvoiceXmlDto invoiceXmlDto = invoiceHttpService.downloadAndParseXML("SomeUrl");
         assertEquals("ING", invoiceXmlDto.getSerie());

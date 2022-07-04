@@ -8,8 +8,10 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,6 +23,7 @@ import urb.projects.facturas.service.CsvParserService;
 
 @Service
 @Transactional
+@Slf4j
 public class InvoiceService {
 
   private FacturaRepository facturaRepository;
@@ -53,8 +56,7 @@ public class InvoiceService {
   }
 
 
-
-  public List<Factura> processReportInvoices(UUID reporteId, InvoiceType invoiceType) throws Exception {
+  public void processReportInvoices(UUID reporteId, InvoiceType invoiceType) throws Exception {
     List<Factura> invoices = facturaRepository.findByReporteId(reporteId);
 
     InvoiceProcessorService invoiceProcessorService = invoiceProcessors.stream()
@@ -62,11 +64,12 @@ public class InvoiceService {
             .findFirst()
             .orElseThrow();
 
-    invoiceProcessorService.processInvoices(invoices);
-
-    facturaRepository.saveAll(invoices);
-
-    return invoices;
+    invoices.parallelStream()
+            .forEach(invoice -> {
+              invoiceProcessorService.processInvoices(invoice);
+              facturaRepository.save(invoice);
+            });
+    log.info("Finished processing {} requests", invoices.size());
   }
 
   private Factura crearFacturaDeCsv(UUID id, InvoiceCsvDto invoiceCsvDto,

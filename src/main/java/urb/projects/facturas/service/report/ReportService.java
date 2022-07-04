@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
@@ -14,6 +16,7 @@ import urb.projects.facturas.domain.*;
 import urb.projects.facturas.service.FileService;
 
 @Service
+@Slf4j
 public class ReportService {
 
   private ReporteRepository reporteRepository;
@@ -47,6 +50,7 @@ public class ReportService {
     return reporteRepository.findAll(pageable);
   }
 
+
   @Async
   public void processReport(UUID id) throws Exception {
     Report report = reporteRepository.findById(id).orElseThrow();
@@ -58,11 +62,12 @@ public class ReportService {
   }
 
   private void updateStatus(Report report, ReportStatus status) {
+    log.info("Updating report {} to status {}", report.getId(), status);
     report.setStatus(status);
     reporteRepository.save(report);
   }
 
-  public List<File> download(UUID reportId) {
+  public List<File> downloadInvoices(UUID reportId) {
     List<Factura> facturas = invoiceService.getFacturasByReporeId(reportId);
     List<UUID> filesUuids = new ArrayList<>();
     for (Factura factura: facturas) {
@@ -72,6 +77,17 @@ public class ReportService {
 
       if(factura.getXmlfileId() != null){
         filesUuids.add(factura.getXmlfileId());
+      }
+    }
+    return fileService.findById(filesUuids);
+  }
+
+  public List<File> downloadReciepts(UUID reportId) {
+    List<Factura> facturas = invoiceService.getFacturasByReporeId(reportId);
+    List<UUID> filesUuids = new ArrayList<>();
+    for (Factura factura: facturas) {
+      if(factura.getRecepitFileId() != null){
+        filesUuids.add(factura.getRecepitFileId());
       }
     }
     return fileService.findById(filesUuids);

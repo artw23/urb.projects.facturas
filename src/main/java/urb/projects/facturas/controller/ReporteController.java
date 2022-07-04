@@ -65,7 +65,6 @@ public class ReporteController {
   @PostMapping(value = "/{id}/process")
   public ResponseEntity processReport(@PathVariable UUID id) throws Exception {
     reporteService.processReport(id);
-    Thread.sleep(2000);
     return new ResponseEntity(HttpStatus.ACCEPTED);
   }
 
@@ -74,9 +73,9 @@ public class ReporteController {
   public ResponseEntity<StreamingResponseBody> downloadReport(@PathVariable UUID id) {
     return ResponseEntity
         .ok()
-        .header("Content-Disposition", "attachment; filename=\"test.zip\"")
+        .header("Content-Disposition", "attachment; filename=\"facturas.zip\"")
         .body(out -> {
-          List<File> filesToDownload = reporteService.download(id);
+          List<File> filesToDownload = reporteService.downloadInvoices(id);
           ZipOutputStream zipOutputStream = new ZipOutputStream(out);
 
           for (File fileToDownload : filesToDownload) {
@@ -89,6 +88,27 @@ public class ReporteController {
 
           zipOutputStream.close();
         });
+  }
+
+  @RequestMapping(value = "/{id}/reciepts", produces = "application/zip")
+  public ResponseEntity<StreamingResponseBody> downloadReciepts(@PathVariable UUID id) {
+    return ResponseEntity
+            .ok()
+            .header("Content-Disposition", "attachment; filename=\"recibos.zip\"")
+            .body(out -> {
+              List<File> filesToDownload = reporteService.downloadReciepts(id);
+              ZipOutputStream zipOutputStream = new ZipOutputStream(out);
+
+              for (File fileToDownload : filesToDownload) {
+                ZipEntry entry = new ZipEntry(fileToDownload.getNombre());
+                entry.setSize(fileToDownload.getContent().length);
+                zipOutputStream.putNextEntry(entry);
+                zipOutputStream.write(fileToDownload.getContent());
+                zipOutputStream.closeEntry();
+              }
+
+              zipOutputStream.close();
+            });
   }
 
 }

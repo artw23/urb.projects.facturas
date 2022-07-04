@@ -9,6 +9,6 @@ public interface InvoiceProcessorService {
 
     boolean canHandle(InvoiceType invoiceType);
 
-    void processInvoices(List<Factura> invoices) throws Exception;
+    void processInvoices(Factura invoices);
 
 }
