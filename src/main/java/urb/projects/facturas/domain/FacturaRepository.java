@@ -13,4 +13,6 @@ public interface FacturaRepository extends PagingAndSortingRepository<Factura, U
   Page<Factura> findByReporteId(UUID reporteId, Pageable pageable);
 
   List<Factura> findByReporteId(UUID reporteId);
+
+  void deleteByReporteId(UUID reporteId);
 }

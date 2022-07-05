@@ -45,4 +45,8 @@ public class FileService {
     return fileRepository.getOne(id);
   }
 
+  public void deletefile(UUID file) {
+     fileRepository.deleteById(file);
+
+  }
 }

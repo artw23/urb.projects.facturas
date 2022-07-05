@@ -98,4 +98,34 @@ public class ReportService {
             .collect(Collectors.toList());
   }
 
+  public void deleteReport(UUID reportId) {
+
+    List<Factura> facturas = invoiceService.getFacturasByReporeId(reportId);
+
+    log.info("Deleting pdfs");
+    facturas
+            .stream()
+            .filter(invoice -> invoice.getPdfFileId() != null)
+            .forEach(invoice -> fileService.deletefile(invoice.getPdfFileId()));
+
+
+    log.info("Deleting xmlFiles");
+
+    facturas
+            .stream()
+            .filter(invoice -> invoice.getXmlfileId() != null)
+            .forEach(invoice -> fileService.deletefile(invoice.getXmlfileId()));
+
+    log.info("Deleting reciepts");
+    facturas
+            .stream()
+            .filter(invoice -> invoice.getRecepitFileId() != null)
+            .forEach(invoice -> fileService.deletefile(invoice.getRecepitFileId()));
+
+    log.info("Deleting invoices");
+    invoiceService.deleteInvoiceByReportId(reportId);
+
+    log.info("Deleting report");
+    reporteRepository.deleteById(reportId);
+  }
 }

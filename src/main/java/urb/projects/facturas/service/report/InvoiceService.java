@@ -97,4 +97,8 @@ public class InvoiceService {
     }
     return invoiceCsvDtos;
   }
+
+  public void deleteInvoiceByReportId(UUID reportId) {
+    facturaRepository.deleteByReporteId(reportId);
+  }
 }
