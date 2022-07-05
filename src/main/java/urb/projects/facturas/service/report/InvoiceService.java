@@ -56,7 +56,7 @@ public class InvoiceService {
   }
 
 
-  public void processReportInvoices(UUID reporteId, InvoiceType invoiceType) throws Exception {
+  public void processReportInvoices(UUID reporteId, InvoiceType invoiceType){
     List<Factura> invoices = facturaRepository.findByReporteId(reporteId);
 
     InvoiceProcessorService invoiceProcessorService = invoiceProcessors.stream()

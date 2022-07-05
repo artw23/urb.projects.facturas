@@ -1,20 +1,18 @@
 package urb.projects.facturas.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import java.util.UUID;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.Enumerated;
+
+import java.util.*;
+import javax.persistence.*;
+
 import lombok.Data;
 import urb.projects.facturas.dto.InvoiceCsvDto;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
 @Data
 @Entity
+@Table(name = "factura")
 public class Factura extends BaseEntity{
 
     @Column(name = "reporte_id")
@@ -63,20 +61,20 @@ public class Factura extends BaseEntity{
     private UUID recepitFileId;
     @ElementCollection
     @Column(name = "errores")
-    private List<String> errores;
+    private Set<String> errores;
 
     public void addError(FacturaErrors error) {
-        if(errores == null){
-            errores = new ArrayList<>();
+        if(this.errores == null){
+            this.errores = new HashSet<>();
         }
-        errores.add(error.getMessage());
+        this.errores.add(error.getMessage());
     }
 
     public void addError(FacturaErrors error, Exception e) {
-        if(errores == null){
-            errores = new ArrayList<>();
+        if(this.errores == null){
+            this.errores = new HashSet<>();
         }
-        errores.add(error.getMessage() + "\n" + e.getMessage());
+        this.errores.add(error.getMessage() + "\n" + e.getMessage());
     }
 
 }

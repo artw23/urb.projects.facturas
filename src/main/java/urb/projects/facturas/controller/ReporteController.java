@@ -3,9 +3,12 @@ package urb.projects.facturas.controller;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
@@ -25,90 +28,113 @@ import urb.projects.facturas.domain.Factura;
 import urb.projects.facturas.domain.File;
 import urb.projects.facturas.domain.InvoiceType;
 import urb.projects.facturas.domain.Report;
+import urb.projects.facturas.service.FileService;
 import urb.projects.facturas.service.report.InvoiceService;
 import urb.projects.facturas.service.report.ReportService;
 
+import javax.swing.text.html.Option;
+
 @RestController
 @RequestMapping("/reports")
+@Slf4j
 public class ReporteController {
 
-  private ReportService reporteService;
+    private ReportService reporteService;
 
-  private InvoiceService facturaService;
+    private InvoiceService facturaService;
 
-  public ReporteController(ReportService reporteService, InvoiceService facturaService) {
-    this.reporteService = reporteService;
-    this.facturaService = facturaService;
-  }
+    private FileService fileService;
 
-  @GetMapping
-  public Page<Report> getAllReports(
-      @PageableDefault(size = 20, sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
-    return reporteService.getAll(pageable);
-  }
+    public ReporteController(ReportService reporteService, InvoiceService facturaService, FileService fileService) {
+        this.reporteService = reporteService;
+        this.facturaService = facturaService;
+        this.fileService = fileService;
+    }
 
-  @PostMapping
-  public Report createReport(@RequestParam("payment_date")
-  @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate paymentDate,
-                             @RequestParam("invoice_type") InvoiceType invoiceType,
-                             @RequestParam("file") MultipartFile file) throws IOException {
-    return reporteService.createReport(paymentDate, invoiceType, file);
+    @GetMapping
+    public Page<Report> getAllReports(
+            @PageableDefault(size = 20, sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
+        return reporteService.getAll(pageable);
+    }
 
-  }
+    @PostMapping
+    public Report createReport(@RequestParam("payment_date")
+                               @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate paymentDate,
+                               @RequestParam("invoice_type") InvoiceType invoiceType,
+                               @RequestParam("file") MultipartFile file) throws IOException {
+        return reporteService.createReport(paymentDate, invoiceType, file);
 
-  @GetMapping(value = "/{id}/invoices")
-  public Page<Factura> getReportInvoices(@PathVariable UUID id,
-                                         @PageableDefault(size = 20, sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
-    return facturaService.getFacturasByReporeId(id, pageable);
-  }
+    }
 
-  @PostMapping(value = "/{id}/process")
-  public ResponseEntity processReport(@PathVariable UUID id) throws Exception {
-    reporteService.processReport(id);
-    return new ResponseEntity(HttpStatus.ACCEPTED);
-  }
+    @GetMapping(value = "/{id}/invoices")
+    public Page<Factura> getReportInvoices(@PathVariable UUID id,
+                                           @PageableDefault(size = 20, sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
+        return facturaService.getFacturasByReporeId(id, pageable);
+    }
+
+    @PostMapping(value = "/{id}/process")
+    public ResponseEntity processReport(@PathVariable UUID id) throws Exception {
+        reporteService.processReport(id);
+        return new ResponseEntity(HttpStatus.ACCEPTED);
+    }
 
 
-  @RequestMapping(value = "/{id}/download", produces = "application/zip")
-  public ResponseEntity<StreamingResponseBody> downloadReport(@PathVariable UUID id) {
-    return ResponseEntity
-        .ok()
-        .header("Content-Disposition", "attachment; filename=\"facturas.zip\"")
-        .body(out -> {
-          List<File> filesToDownload = reporteService.downloadInvoices(id);
-          ZipOutputStream zipOutputStream = new ZipOutputStream(out);
+    @RequestMapping(value = "/{id}/download", produces = "application/zip")
+    public ResponseEntity<StreamingResponseBody> downloadReport(@PathVariable UUID id) {
+        return ResponseEntity
+                .ok()
+                .header("Content-Disposition", "attachment; filename=\"facturas.zip\"")
+                .body(out -> {
+                    List<UUID> filesToDownload = reporteService.getInvoicesToDowlnoad(id);
+                    ZipOutputStream zipOutputStream = new ZipOutputStream(out);
 
-          for (File fileToDownload : filesToDownload) {
-            ZipEntry entry = new ZipEntry(fileToDownload.getNombre());
-            entry.setSize(fileToDownload.getContent().length);
-            zipOutputStream.putNextEntry(entry);
-            zipOutputStream.write(fileToDownload.getContent());
-            zipOutputStream.closeEntry();
-          }
+                    log.info("Starting compressing files");
+                    for (UUID fileToDownload : filesToDownload) {
+                        Optional<File> optionalFile = fileService.findById(fileToDownload);
 
-          zipOutputStream.close();
-        });
-  }
+                        if(optionalFile.isPresent()){
+                            File file = optionalFile.get();
+                            ZipEntry entry = new ZipEntry(file.getNombre());
+                            entry.setSize(file.getContent().length);
+                            zipOutputStream.putNextEntry(entry);
+                            zipOutputStream.write(file.getContent());
+                            zipOutputStream.closeEntry();
+                        }
+                    }
+                    log.info("Finished compressing files");
+                    zipOutputStream.close();
+                });
+    }
 
-  @RequestMapping(value = "/{id}/reciepts", produces = "application/zip")
-  public ResponseEntity<StreamingResponseBody> downloadReciepts(@PathVariable UUID id) {
-    return ResponseEntity
-            .ok()
-            .header("Content-Disposition", "attachment; filename=\"recibos.zip\"")
-            .body(out -> {
-              List<File> filesToDownload = reporteService.downloadReciepts(id);
-              ZipOutputStream zipOutputStream = new ZipOutputStream(out);
+    @RequestMapping(value = "/{id}/reciepts", produces = "application/zip")
+    public ResponseEntity<StreamingResponseBody> downloadReciepts(@PathVariable UUID id) {
+        return ResponseEntity
+                .ok()
+                .header("Content-Disposition", "attachment; filename=\"recibos.zip\"")
+                .body(out -> {
 
-              for (File fileToDownload : filesToDownload) {
-                ZipEntry entry = new ZipEntry(fileToDownload.getNombre());
-                entry.setSize(fileToDownload.getContent().length);
-                zipOutputStream.putNextEntry(entry);
-                zipOutputStream.write(fileToDownload.getContent());
-                zipOutputStream.closeEntry();
-              }
+                    List<UUID> filesToDownload = reporteService.getRecieptsToDowlnoad(id);
+                    ZipOutputStream zipOutputStream = new ZipOutputStream(out);
 
-              zipOutputStream.close();
-            });
-  }
+                    log.info("Starting compressing files");
+                    int count = 1;
+                    for (UUID fileToDownload : filesToDownload) {
+
+                        log.info("Downloading file {} of {}", count ++, filesToDownload.size());
+                        Optional<File> optionalFile = fileService.findById(fileToDownload);
+
+                        if(optionalFile.isPresent()){
+                            File file = optionalFile.get();
+                            ZipEntry entry = new ZipEntry(file.getNombre());
+                            entry.setSize(file.getContent().length);
+                            zipOutputStream.putNextEntry(entry);
+                            zipOutputStream.write(file.getContent());
+                            zipOutputStream.closeEntry();
+                        }
+                    }
+                    log.info("Finished compressing files");
+                    zipOutputStream.close();
+                });
+    }
 
 }

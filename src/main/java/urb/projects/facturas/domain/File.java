@@ -1,21 +1,20 @@
 package urb.projects.facturas.domain;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Lob;
+import javax.persistence.*;
+
 import lombok.Data;
+import org.hibernate.annotations.Type;
 
 @Data
+@Table(name = "file")
 @Entity
 public class File extends BaseEntity {
 
   @Column
   private String nombre;
 
-  @Column
-  private String extension;
-
   @Lob
+  @Type(type = "org.hibernate.type.ImageType")
   private byte[] content;
 
 }

@@ -2,8 +2,7 @@ package urb.projects.facturas.domain;
 
 import java.time.LocalDate;
 import java.util.UUID;
-import javax.persistence.Column;
-import javax.persistence.Entity;
+import javax.persistence.*;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,6 +13,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "report")
 @Entity
 public class Report extends BaseEntity {
 

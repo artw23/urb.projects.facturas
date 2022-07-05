@@ -5,12 +5,15 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import urb.projects.facturas.domain.*;
 import urb.projects.facturas.service.FileService;
@@ -52,13 +55,14 @@ public class ReportService {
 
 
   @Async
-  public void processReport(UUID id) throws Exception {
+  public void processReport(UUID id) {
     Report report = reporteRepository.findById(id).orElseThrow();
     updateStatus(report, ReportStatus.RUNNING);
 
     invoiceService.processReportInvoices(id, report.getInvoiceType());
 
     updateStatus(report, ReportStatus.SUCCESS);
+    log.info("Finished processing async");
   }
 
   private void updateStatus(Report report, ReportStatus status) {
@@ -67,30 +71,31 @@ public class ReportService {
     reporteRepository.save(report);
   }
 
-  public List<File> downloadInvoices(UUID reportId) {
-    List<Factura> facturas = invoiceService.getFacturasByReporeId(reportId);
-    List<UUID> filesUuids = new ArrayList<>();
-    for (Factura factura: facturas) {
-      if(factura.getPdfFileId() != null){
-        filesUuids.add(factura.getPdfFileId());
-      }
+  @Transactional
+  public List<UUID> getInvoicesToDowlnoad(UUID reportId) {
+    List<UUID> pdfFiles=  invoiceService.getFacturasByReporeId(reportId)
+            .stream()
+            .filter(invoice -> invoice.getPdfFileId() != null)
+            .map(Factura::getPdfFileId)
+            .collect(Collectors.toList());
 
-      if(factura.getXmlfileId() != null){
-        filesUuids.add(factura.getXmlfileId());
-      }
-    }
-    return fileService.findById(filesUuids);
+    List<UUID> xmlFile=  invoiceService.getFacturasByReporeId(reportId)
+            .stream()
+            .filter(invoice -> invoice.getXmlfileId() != null)
+            .map(Factura::getXmlfileId)
+            .collect(Collectors.toList());
+
+    pdfFiles.addAll(xmlFile);
+    return pdfFiles;
   }
 
-  public List<File> downloadReciepts(UUID reportId) {
-    List<Factura> facturas = invoiceService.getFacturasByReporeId(reportId);
-    List<UUID> filesUuids = new ArrayList<>();
-    for (Factura factura: facturas) {
-      if(factura.getRecepitFileId() != null){
-        filesUuids.add(factura.getRecepitFileId());
-      }
-    }
-    return fileService.findById(filesUuids);
+  @Transactional
+  public List<UUID> getRecieptsToDowlnoad(UUID reportId) {
+    return invoiceService.getFacturasByReporeId(reportId)
+            .stream()
+            .filter(invoice -> invoice.getRecepitFileId() != null)
+            .map(Factura::getRecepitFileId)
+            .collect(Collectors.toList());
   }
 
 }

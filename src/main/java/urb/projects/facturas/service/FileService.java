@@ -3,12 +3,15 @@ package urb.projects.facturas.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import urb.projects.facturas.domain.File;
 import urb.projects.facturas.domain.FileRepository;
 @Service
+@Transactional
 public class FileService {
 
   FileRepository fileRepository;
@@ -21,7 +24,11 @@ public class FileService {
     return this.saveFile(nombre, multipartFile.getBytes());
   }
 
-  public List<File> findById(List<UUID> uuids){
+  public Optional<File> findById(UUID uuids){
+    return fileRepository.findById(uuids);
+  }
+
+  public List<File> findByIds(List<UUID> uuids){
     return fileRepository.findAllById(uuids);
   }
 
