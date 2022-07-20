@@ -81,7 +81,7 @@ public class InvoiceHttpService {
                 .queryParam("namexml", fileName)
                 .toUriString();
 
-        log.info("Downloading pdf {} for invoice {}", downloadUrl, fileName);
+        log.info("Downloading xml {} for invoice {}", downloadUrl, fileName);
 
         try {
             return fileDownloaderService.getDownloadFile(downloadUrl);

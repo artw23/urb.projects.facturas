@@ -49,6 +49,7 @@ public class ReporteController {
     @GetMapping
     public Page<Report> getAllReports(
             @PageableDefault(size = 20, sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
+        log.info("GET ALL /");
         return reporteService.getAll(pageable);
     }
 
@@ -57,23 +58,29 @@ public class ReporteController {
                                @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate paymentDate,
                                @RequestParam("invoice_type") InvoiceType invoiceType,
                                @RequestParam("file") MultipartFile file) throws IOException {
+        log.info("REQUEST POST /");
+
         return reporteService.createReport(paymentDate, invoiceType, file);
 
     }
 
     @DeleteMapping(value = "/{id}")
     public void deleteReport(@PathVariable UUID id) throws IOException {
+        log.info("REQUEST DELETE /{}", id);
         reporteService.deleteReport(id);
     }
 
     @GetMapping(value = "/{id}/invoices")
     public Page<Factura> getReportInvoices(@PathVariable UUID id,
                                            @PageableDefault(size = 20, sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
+        log.info("REQUEST GET /{}/invoices", id);
         return facturaService.getFacturasByReporeId(id, pageable);
     }
 
     @PostMapping(value = "/{id}/process")
     public ResponseEntity processReport(@PathVariable UUID id) throws Exception {
+        log.info("REQUEST GET /{}/process", id);
+
         reporteService.processReport(id);
         return new ResponseEntity(HttpStatus.ACCEPTED);
     }
@@ -81,6 +88,8 @@ public class ReporteController {
 
     @RequestMapping(value = "/{id}/download", produces = "application/zip")
     public ResponseEntity<StreamingResponseBody> downloadReport(@PathVariable UUID id) {
+        log.info("REQUEST GET /{}/download", id);
+
         return ResponseEntity
                 .ok()
                 .header("Content-Disposition", "attachment; filename=\"facturas.zip\"")
