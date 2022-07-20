@@ -49,10 +49,10 @@ public class InvoiceProcessorPredialServiceImpl  implements InvoiceProcessorServ
     private void processInvoice(Factura invoice) throws InvoiceProcessException {
         getG01Invoice(invoice);
 
-        File pdfFile = invoiceHttpService.downloadPdf(getInvoiceFileName(invoice), invoice.getNombreFactura());
+        File pdfFile = invoiceHttpService.downloadPdf(getInvoiceFileName(invoice), invoice.getPdfUrl());
         invoice.setPdfFileId(pdfFile.getId());
 
-        File xmlFile = invoiceHttpService.downloadXml(getInvoiceFileName(invoice), invoice.getNombreFactura());
+        File xmlFile = invoiceHttpService.downloadXml(getInvoiceFileName(invoice), invoice.getXmlUrl());
         invoice.setXmlfileId(xmlFile.getId());
     }
 
@@ -61,8 +61,9 @@ public class InvoiceProcessorPredialServiceImpl  implements InvoiceProcessorServ
         log.info("Retrieving invoice {}", invoice.getClaveCatastral());
         List<InvoiceHttpDto> invoiceHttpListDto = invoiceHttpService.getPredialInvoices(invoice.getClaveCatastral(), invoice.getFecha().getYear(), invoice.getCantidadInicial());
 
-        log.info("Getting G01 invoice {}", invoice.getClaveCatastral());
         Map<InvoiceXmlDto, InvoiceHttpDto> map = new HashMap<>();
+
+        log.info("Getting G01 invoice {} downloading {} xmls", invoiceHttpListDto.size(), invoice.getClaveCatastral());
         for(InvoiceHttpDto invoiceHttpDto: invoiceHttpListDto){
             map.put(invoiceHttpService.downloadAndParseXML(invoiceHttpDto.getArchivo_xml()), invoiceHttpDto);
         }
@@ -101,6 +102,7 @@ public class InvoiceProcessorPredialServiceImpl  implements InvoiceProcessorServ
             throw new InvoiceProcessException(FacturaErrors.INVOICE_WITH_MATCH_PRICE_AND_DATE);
 
         }else if(g01invoice.get().getTotal() == invoice.getCantidadInicial()){
+            log.info("G01 found for invoice {}", invoice.getClaveCatastral());
             InvoiceXmlDto invoiceXmlDto = g01invoice.get();
             InvoiceHttpDto invoiceHttpDto = map.get(invoiceXmlDto);
 

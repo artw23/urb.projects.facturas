@@ -144,6 +144,8 @@ public class InvoiceHttpService {
         headers.put("operacion", operacion);
         headers.put("importe", (int)amount);
 
+        log.info("Searching diversos invoice operacion: {}, anio: {}, cantidad: {}", operacion, year, amount);
+
         List<InvoiceHttpDto> invoiceHttpDtos = getInvoices(headers);
         if(invoiceHttpDtos.isEmpty()){
             throw new InvoiceProcessException(FacturaErrors.NO_INVOICE_FOUND);
@@ -173,6 +175,9 @@ public class InvoiceHttpService {
         headers.put("operacion", claveCatastral);
         headers.put("importe", (int)amount);
 
+        log.info("Searching predial invoice claveCatastral: {}, anio: {}, cantidad: {}", claveCatastral, year, amount);
+
+
         List<InvoiceHttpDto> invoiceHttpDtos = getInvoices(headers);
         if(invoiceHttpDtos.isEmpty()){
             invoiceHttpDtos = getPredialInvoices(claveCatastral, year);
@@ -195,6 +200,7 @@ public class InvoiceHttpService {
                 .retrieve()
                 .bodyToMono(String.class)
                 .block();
+
 
         try {
             InvoiceHttpListDto invoiceHttpListDto = objectMapper.readValue(result, InvoiceHttpListDto.class);

@@ -49,7 +49,6 @@ public class ReporteController {
     @GetMapping
     public Page<Report> getAllReports(
             @PageableDefault(size = 20, sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
-        log.info("GET ALL /");
         return reporteService.getAll(pageable);
     }
 
@@ -73,7 +72,6 @@ public class ReporteController {
     @GetMapping(value = "/{id}/invoices")
     public Page<Factura> getReportInvoices(@PathVariable UUID id,
                                            @PageableDefault(size = 20, sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
-        log.info("REQUEST GET /{}/invoices", id);
         return facturaService.getFacturasByReporeId(id, pageable);
     }
 
