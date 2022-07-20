@@ -81,6 +81,8 @@ public class InvoiceHttpService {
                 .queryParam("namexml", fileName)
                 .toUriString();
 
+        log.info("Downloading pdf {} for invoice {}", downloadUrl, fileName);
+
         try {
             return fileDownloaderService.getDownloadFile(downloadUrl);
         } catch (IOException e) {
@@ -123,6 +125,8 @@ public class InvoiceHttpService {
                 .queryParam("urlpdf", url)
                 .queryParam("namepdf", fileName)
                 .toUriString();
+
+        log.info("Downloading pdf {} for invoice {}", downloadUrl, outputName);
 
         try {
             byte[] file = fileDownloaderService.getDownloadFile(downloadUrl);

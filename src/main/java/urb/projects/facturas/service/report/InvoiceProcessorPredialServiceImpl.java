@@ -49,11 +49,9 @@ public class InvoiceProcessorPredialServiceImpl  implements InvoiceProcessorServ
     private void processInvoice(Factura invoice) throws InvoiceProcessException {
         getG01Invoice(invoice);
 
-        log.info("Downloading pdf for invoice {}", invoice.getClaveCatastral());
         File pdfFile = invoiceHttpService.downloadPdf(getInvoiceFileName(invoice), invoice.getNombreFactura());
         invoice.setPdfFileId(pdfFile.getId());
 
-        log.info("Downloading xml for invoice {}", invoice.getClaveCatastral());
         File xmlFile = invoiceHttpService.downloadXml(getInvoiceFileName(invoice), invoice.getNombreFactura());
         invoice.setXmlfileId(xmlFile.getId());
     }

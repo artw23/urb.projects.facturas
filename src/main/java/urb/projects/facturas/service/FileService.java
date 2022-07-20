@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -12,6 +14,7 @@ import urb.projects.facturas.domain.File;
 import urb.projects.facturas.domain.FileRepository;
 @Service
 @Transactional
+@Slf4j
 public class FileService {
 
   FileRepository fileRepository;
@@ -33,6 +36,7 @@ public class FileService {
   }
 
   public File saveFile(String nombre, byte[] bytes){
+    log.info("Saving file {}", nombre);
     File file = new File();
     file.setNombre(nombre);
     file.setContent(bytes);
