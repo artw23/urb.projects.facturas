@@ -57,12 +57,14 @@ public class ReportService {
   @Async
   public void processReport(UUID id) {
     Report report = reporteRepository.findById(id).orElseThrow();
+
+    log.info("Starting processing report {}", id);
     updateStatus(report, ReportStatus.RUNNING);
 
     invoiceService.processReportInvoices(id, report.getInvoiceType());
 
     updateStatus(report, ReportStatus.SUCCESS);
-    log.info("Finished processing async");
+    log.info("Finished processing report {}", id);
   }
 
   private void updateStatus(Report report, ReportStatus status) {

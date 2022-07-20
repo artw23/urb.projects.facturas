@@ -38,9 +38,10 @@ public class InvoiceProcessorPredialServiceImpl  implements InvoiceProcessorServ
             try {
                 processInvoice(invoice);
             } catch (InvoiceProcessException e) {
+                log.warn("Error processing invoice {}", e.getFacturaErrors());
                 invoice.addError(e.getFacturaErrors());
             } catch (Exception e){
-                log.error("Error processing invoice", e);
+                log.error("Unknown error processing invoice {}", invoice.toString());
                 invoice.addError(FacturaErrors.UNKNOW_ERROR, e);
             }
     }
@@ -48,16 +49,21 @@ public class InvoiceProcessorPredialServiceImpl  implements InvoiceProcessorServ
     private void processInvoice(Factura invoice) throws InvoiceProcessException {
         getG01Invoice(invoice);
 
+        log.info("Downloading pdf for invoice {}", invoice.getClaveCatastral());
         File pdfFile = invoiceHttpService.downloadPdf(getInvoiceFileName(invoice), invoice.getNombreFactura());
         invoice.setPdfFileId(pdfFile.getId());
 
+        log.info("Downloading xml for invoice {}", invoice.getClaveCatastral());
         File xmlFile = invoiceHttpService.downloadXml(getInvoiceFileName(invoice), invoice.getNombreFactura());
         invoice.setXmlfileId(xmlFile.getId());
     }
 
     private void getG01Invoice(Factura invoice) throws InvoiceProcessException {
+
+        log.info("Retrieving invoice {}", invoice.getClaveCatastral());
         List<InvoiceHttpDto> invoiceHttpListDto = invoiceHttpService.getPredialInvoices(invoice.getClaveCatastral(), invoice.getFecha().getYear(), invoice.getCantidadInicial());
 
+        log.info("Getting G01 invoice {}", invoice.getClaveCatastral());
         Map<InvoiceXmlDto, InvoiceHttpDto> map = new HashMap<>();
         for(InvoiceHttpDto invoiceHttpDto: invoiceHttpListDto){
             map.put(invoiceHttpService.downloadAndParseXML(invoiceHttpDto.getArchivo_xml()), invoiceHttpDto);
@@ -89,6 +95,8 @@ public class InvoiceProcessorPredialServiceImpl  implements InvoiceProcessorServ
                     .orElseThrow(() -> new InvoiceProcessException(FacturaErrors.AMOUNT_MATCHED_BUT_NOT_DATE));
 
             InvoiceHttpDto invoiceHttpDto = map.get(finalMatch);
+
+            log.info("Downloading reciept {}", invoice.getClaveCatastral());
 
             File recieptFile = invoiceHttpService.downloadReciept(getReciboFileName(invoice), invoiceHttpDto.getNo_liquidacion());
             invoice.setRecepitFileId(recieptFile.getId());

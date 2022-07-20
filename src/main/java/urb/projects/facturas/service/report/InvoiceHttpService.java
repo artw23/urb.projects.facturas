@@ -101,10 +101,6 @@ public class InvoiceHttpService {
 
         byte[] result =  WebClient.builder()
                 .baseUrl(RECIBO_BASE_URL)
-                .filters(exchangeFilterFunctions -> {
-                    exchangeFilterFunctions.add(logRequest());
-                    exchangeFilterFunctions.add(logRequest());
-                })
                 .exchangeStrategies(strategies)
                 .clientConnector(new ReactorClientHttpConnector(HttpClient.create().wiretap(true)))
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
@@ -113,7 +109,6 @@ public class InvoiceHttpService {
                 .body(BodyInserters.fromFormData(formData))
                 .retrieve()
                 .bodyToMono(ByteArrayResource.class)
-                .log()
                 .block()
                 .getByteArray();
 
@@ -185,10 +180,6 @@ public class InvoiceHttpService {
     private List<InvoiceHttpDto> getInvoices(HashMap<String, Object> headers) throws InvoiceProcessException {
         String result =  WebClient.builder()
                 .baseUrl(BASE_URL)
-                .filters(exchangeFilterFunctions -> {
-                    exchangeFilterFunctions.add(logRequest());
-                    exchangeFilterFunctions.add(logRequest());
-                })
                 .build()
                 .get()
                 .uri(uriBuilder -> uriBuilder
@@ -199,7 +190,6 @@ public class InvoiceHttpService {
                         .build())
                 .retrieve()
                 .bodyToMono(String.class)
-                .log()
                 .block();
 
         try {
@@ -216,15 +206,6 @@ public class InvoiceHttpService {
         String[] paths = url.split("/");
         String filename = paths[paths.length-1];
         return filename.replace(".xml","").replace(".pdf","");
-    }
-
-    private static ExchangeFilterFunction logRequest() {
-        return ExchangeFilterFunction.ofRequestProcessor(clientRequest -> {
-            log.info("Request: {} {}", clientRequest.method(), clientRequest.url());
-            clientRequest.headers().forEach((name, values) -> values.forEach(value -> log.info("{}={}", name, value)));
-            log.info("Body: {}", clientRequest.body());
-            return Mono.just(clientRequest);
-        });
     }
 
 }

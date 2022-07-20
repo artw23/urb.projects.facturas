@@ -64,7 +64,9 @@ public class InvoiceService {
             .findFirst()
             .orElseThrow();
 
-    invoices.parallelStream()
+    log.info("Processing {} invoices of type {} for report {}", invoices.size(), invoiceType, reporteId);
+
+    invoices.stream()
             .forEach(invoice -> {
               invoiceProcessorService.processInvoices(invoice);
               facturaRepository.save(invoice);
