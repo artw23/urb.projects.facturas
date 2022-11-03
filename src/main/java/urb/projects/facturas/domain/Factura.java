@@ -6,6 +6,7 @@ import java.util.*;
 import javax.persistence.*;
 
 import lombok.Data;
+import org.springframework.util.StringUtils;
 import urb.projects.facturas.dto.InvoiceCsvDto;
 
 import java.time.LocalDate;
@@ -68,6 +69,18 @@ public class Factura extends BaseEntity{
             this.errores = new HashSet<>();
         }
         this.errores.add(error.getMessage());
+    }
+
+    public void addError(FacturaErrors error, String message) {
+        if(this.errores == null){
+            this.errores = new HashSet<>();
+        }
+        if(!StringUtils.isEmpty(message)){
+            this.errores.add(error.getMessage() + message);
+        }else{
+            this.errores.add(error.getMessage());
+        }
+
     }
 
     public void addError(FacturaErrors error, Exception e) {

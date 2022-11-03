@@ -39,7 +39,7 @@ public class InvoiceProcessorPredialServiceImpl  implements InvoiceProcessorServ
                 processInvoice(invoice);
             } catch (InvoiceProcessException e) {
                 log.warn("Error processing invoice {}", e.getFacturaErrors());
-                invoice.addError(e.getFacturaErrors());
+                invoice.addError(e.getFacturaErrors(), e.getDescription());
             } catch (Exception e){
                 log.error("Unknown error processing invoice {}", invoice.toString());
                 invoice.addError(FacturaErrors.UNKNOW_ERROR, e);
@@ -68,54 +68,34 @@ public class InvoiceProcessorPredialServiceImpl  implements InvoiceProcessorServ
             map.put(invoiceHttpService.downloadAndParseXML(invoiceHttpDto.getArchivo_xml()), invoiceHttpDto);
         }
 
-        Optional<InvoiceXmlDto> g01invoice = map.keySet()
+        Optional<InvoiceXmlDto> matchedInvoice = map.keySet()
                 .stream()
                 .filter(invoiceXmlDto -> G01.equalsIgnoreCase(invoiceXmlDto.getReceptorXml().getUsoCfdi()))
+                .filter(invoiceXmlDto -> invoice.getFecha().equals(invoiceXmlDto.getFecha()))
+                .filter(invoiceXmlDto ->  invoiceXmlDto.getTotal() == invoice.getCantidadInicial())
                 .findFirst();
 
-        if(g01invoice.isEmpty()){
-            invoice.addError(FacturaErrors.NO_G01_INVOICE);
-
-            List<InvoiceXmlDto>  matchedInvoice = map.keySet()
+        if(matchedInvoice.isEmpty()){
+            List<String> foundInvoices = map.keySet()
                     .stream()
-                    .filter(invoiceXmlDto -> invoiceXmlDto.getTotal() == invoice.getCantidadInicial())
-                    .collect(Collectors.toList());
-
-            if(matchedInvoice.isEmpty()){
-                throw new InvoiceProcessException(FacturaErrors.AMOUNT_DONT_MATCH);
-            }
-
-            InvoiceXmlDto finalMatch = matchedInvoice.stream()
-                    .filter(matched -> {
-                        InvoiceHttpDto invoiceHttpDto = map.get(matched);
-                        return invoiceHttpDto.getFecha_pago().equals(invoice.getFecha());
+                    .map(inv -> {
+                        return "Fecha: " + inv.getFecha() + " Total: " + inv.getTotal();
                     })
-                    .findFirst()
-                    .orElseThrow(() -> new InvoiceProcessException(FacturaErrors.AMOUNT_MATCHED_BUT_NOT_DATE));
-
-            InvoiceHttpDto invoiceHttpDto = map.get(finalMatch);
-
-            log.info("Downloading reciept {}", invoice.getClaveCatastral());
-
-            File recieptFile = invoiceHttpService.downloadReciept(getReciboFileName(invoice), invoiceHttpDto.getNo_liquidacion());
-            invoice.setRecepitFileId(recieptFile.getId());
-            throw new InvoiceProcessException(FacturaErrors.INVOICE_WITH_MATCH_PRICE_AND_DATE);
-
-        }else if(g01invoice.get().getTotal() == invoice.getCantidadInicial()){
-            log.info("G01 found for invoice {}", invoice.getClaveCatastral());
-            InvoiceXmlDto invoiceXmlDto = g01invoice.get();
-            InvoiceHttpDto invoiceHttpDto = map.get(invoiceXmlDto);
-
-            invoice.setNombreFactura(invoiceXmlDto.getSerie() + invoiceXmlDto.getFolio());
-            invoice.setCantidadFinal(invoiceHttpDto.getImporte());
-            invoice.setPeriodo(invoiceHttpDto.getPeriodo_inicial());
-            invoice.setFecha(invoiceHttpDto.getFecha_pago());
-            invoice.setPdfUrl(invoiceHttpDto.getArchivo_pdf());
-            invoice.setXmlUrl(invoiceHttpDto.getArchivo_xml());
-            return;
+                    .collect(Collectors.toList());
+            throw new InvoiceProcessException(FacturaErrors.WRONG_INVOICE_RETRIEVE, String.join("\n"));
         }
 
-        throw  new InvoiceProcessException(FacturaErrors.WRONG_INVOICE_RETRIEVE);
+
+        InvoiceHttpDto invoiceHttpDto = map.get(matchedInvoice);
+
+        InvoiceXmlDto invoiceXmlDto = matchedInvoice.get();
+
+        invoice.setNombreFactura(invoiceXmlDto.getSerie() + invoiceXmlDto.getFolio());
+        invoice.setCantidadFinal(invoiceHttpDto.getImporte());
+        invoice.setPeriodo(invoiceHttpDto.getPeriodo_inicial());
+        invoice.setFecha(invoiceHttpDto.getFecha_pago());
+        invoice.setPdfUrl(invoiceHttpDto.getArchivo_pdf());
+        invoice.setXmlUrl(invoiceHttpDto.getArchivo_xml());
     }
 
     private boolean isCorrectInvoice(InvoiceXmlDto invoiceXmlDto, Factura invoice){
