@@ -79,10 +79,10 @@ public class InvoiceProcessorPredialServiceImpl  implements InvoiceProcessorServ
             List<String> foundInvoices = map.keySet()
                     .stream()
                     .map(inv -> {
-                        return "Fecha: " + inv.getFecha() + " Total: " + inv.getTotal();
+                        return "CFDI: " + inv.getReceptorXml().getUsoCfdi() + " Fecha: " + inv.getFecha() + " Total: " + inv.getTotal();
                     })
                     .collect(Collectors.toList());
-            throw new InvoiceProcessException(FacturaErrors.WRONG_INVOICE_RETRIEVE, String.join("\n"));
+            throw new InvoiceProcessException(FacturaErrors.WRONG_INVOICE_RETRIEVE, String.join("\n", foundInvoices));
         }
 
 
