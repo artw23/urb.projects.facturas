@@ -86,9 +86,9 @@ public class InvoiceProcessorPredialServiceImpl  implements InvoiceProcessorServ
         }
 
 
-        InvoiceHttpDto invoiceHttpDto = map.get(matchedInvoice);
-
         InvoiceXmlDto invoiceXmlDto = matchedInvoice.get();
+
+        InvoiceHttpDto invoiceHttpDto = map.get(invoiceXmlDto);
 
         invoice.setNombreFactura(invoiceXmlDto.getSerie() + invoiceXmlDto.getFolio());
         invoice.setCantidadFinal(invoiceHttpDto.getImporte());
